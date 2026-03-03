@@ -29,6 +29,11 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // ─── Session configuration ───────────────────────────────────────────────────
+const isProduction = process.env.NODE_ENV === "production";
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "fallback-secret-change-me",
@@ -36,7 +41,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // set to true behind HTTPS in production
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 1000 * 60 * 60, // 1 hour
     },
   })
@@ -57,15 +63,15 @@ app.get("/dashboard", ensureAuthenticated, (req, res) => {
   res.render("dashboard", { user: req.session.user });
 });
 
-// ─── Start server ────────────────────────────────────────────────────────────
+// ─── Start server (local dev only; Vercel uses the export below) ────────────
 
-async function start() {
-  // Seed a demo user for easy local testing
-  await userStore.seedDemoUser();
-
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
+if (require.main === module) {
+  (async () => {
+    await userStore.seedDemoUser();
+    app.listen(PORT, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  })();
 }
 
-start();
+module.exports = app;
