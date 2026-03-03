@@ -128,8 +128,9 @@ router.get("/auth/microsoft", async (req, res) => {
     });
     res.redirect(authUrl);
   } catch (err) {
-    console.error("Microsoft auth start error:", err);
-    res.render("login", { error: "Could not start Microsoft login. Check your Entra config." });
+    console.error("Microsoft auth start error:", err.message, err.stack);
+    const detail = process.env.NODE_ENV !== "production" ? ` (${err.message})` : "";
+    res.render("login", { error: `Could not start Microsoft login. Check your Entra config.${detail}` });
   }
 });
 
