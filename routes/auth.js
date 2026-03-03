@@ -17,8 +17,19 @@ const userStore = require("../store/users");
 
 const router = express.Router();
 
-// Create a single ConfidentialClientApplication instance
-const msalClient = new msal.ConfidentialClientApplication(msalConfig);
+let msalClient = null;
+
+function getMsalClient() {
+  if (!msalClient) {
+    if (!msalConfig.auth.clientId || !msalConfig.auth.clientSecret) {
+      throw new Error(
+        "Microsoft Entra environment variables (CLIENT_ID, CLIENT_SECRET, TENANT_ID) are not configured."
+      );
+    }
+    msalClient = new msal.ConfidentialClientApplication(msalConfig);
+  }
+  return msalClient;
+}
 
 // ─── Login page ──────────────────────────────────────────────────────────────
 
@@ -110,7 +121,7 @@ router.post("/auth/local/register", async (req, res) => {
 
 router.get("/auth/microsoft", async (req, res) => {
   try {
-    const authUrl = await msalClient.getAuthCodeUrl({
+    const authUrl = await getMsalClient().getAuthCodeUrl({
       scopes: SCOPES,
       redirectUri: REDIRECT_URI,
       prompt: "select_account",
@@ -133,7 +144,7 @@ router.get("/auth/microsoft/callback", async (req, res) => {
     }
 
     // Exchange the authorization code for tokens
-    const tokenResponse = await msalClient.acquireTokenByCode({
+    const tokenResponse = await getMsalClient().acquireTokenByCode({
       code,
       scopes: SCOPES,
       redirectUri: REDIRECT_URI,
