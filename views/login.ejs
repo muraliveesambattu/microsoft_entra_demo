@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Entra Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, .4);
+    }
+
+    .card h1 {
+      text-align: center;
+      font-size: 1.75rem;
+      margin-bottom: 8px;
+      color: #f8fafc;
+    }
+
+    .card p.subtitle {
+      text-align: center;
+      font-size: .9rem;
+      color: #94a3b8;
+      margin-bottom: 28px;
+    }
+
+    .error {
+      background: #450a0a;
+      border: 1px solid #7f1d1d;
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: .85rem;
+      margin-bottom: 18px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: #64748b;
+      font-size: .8rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #334155;
+    }
+
+    .divider span { padding: 0 12px; }
+
+    label {
+      display: block;
+      font-size: .85rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #f8fafc;
+      font-size: .95rem;
+      margin-bottom: 14px;
+      transition: border-color .2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+
+    .btn:active { transform: scale(.98); }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #2563eb; }
+
+    .btn-microsoft {
+      background: #f8fafc;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-microsoft:hover { background: #e2e8f0; }
+
+    .btn-microsoft svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      font-size: .85rem;
+      color: #64748b;
+    }
+
+    .footer a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Welcome Back</h1>
+    <p class="subtitle">Sign in to continue to the dashboard</p>
+
+    <% if (error) { %>
+      <div class="error"><%= error %></div>
+    <% } %>
+
+    <!-- Microsoft Login Button -->
+    <a href="/auth/microsoft" class="btn btn-microsoft" style="text-decoration:none;">
+      <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1"  y="1"  width="9" height="9" fill="#f25022"/>
+        <rect x="11" y="1"  width="9" height="9" fill="#7fba00"/>
+        <rect x="1"  y="11" width="9" height="9" fill="#00a4ef"/>
+        <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+      </svg>
+      Login with Microsoft
+    </a>
+
+    <div class="divider"><span>or sign in with email</span></div>
+
+    <!-- Local Login Form -->
+    <form method="POST" action="/auth/local/login">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Your password" required />
+
+      <button type="submit" class="btn btn-primary">Login with Email</button>
+    </form>
+
+    <div class="footer">
+      Don't have an account? <a href="/register">Create one</a>
+    </div>
+  </div>
+</body>
+</html>

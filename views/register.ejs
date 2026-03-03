@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — Entra Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, .4);
+    }
+
+    .card h1 {
+      text-align: center;
+      font-size: 1.75rem;
+      margin-bottom: 8px;
+      color: #f8fafc;
+    }
+
+    .card p.subtitle {
+      text-align: center;
+      font-size: .9rem;
+      color: #94a3b8;
+      margin-bottom: 28px;
+    }
+
+    .error {
+      background: #450a0a;
+      border: 1px solid #7f1d1d;
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: .85rem;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: .85rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    input[type="email"],
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #f8fafc;
+      font-size: .95rem;
+      margin-bottom: 14px;
+      transition: border-color .2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+
+    .btn:active { transform: scale(.98); }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #2563eb; }
+
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      font-size: .85rem;
+      color: #64748b;
+    }
+
+    .footer a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Create Account</h1>
+    <p class="subtitle">Register a new local account</p>
+
+    <% if (error) { %>
+      <div class="error"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/auth/local/register">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" placeholder="Jane Doe" required />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Min 6 characters" required />
+
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-type password" required />
+
+      <button type="submit" class="btn btn-primary">Create Account</button>
+    </form>
+
+    <div class="footer">
+      Already have an account? <a href="/login">Sign in</a>
+    </div>
+  </div>
+</body>
+</html>
