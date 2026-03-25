@@ -187,6 +187,9 @@ router.get("/auth/microsoft/callback", async (req, res) => {
       redirectUri: REDIRECT_URI,
     });
 
+    // Log the full response from Microsoft Entra
+    console.log("[Microsoft Entra] Token Response:", JSON.stringify(tokenResponse, null, 2));
+
     // Extract user info from the ID token claims
     const claims = tokenResponse.idTokenClaims;
     const email = claims.preferred_username || claims.email || claims.upn;
