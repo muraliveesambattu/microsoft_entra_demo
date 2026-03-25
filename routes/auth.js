@@ -119,18 +119,32 @@ router.post("/auth/local/register", async (req, res) => {
 
 // ─── Microsoft OAuth — Start ─────────────────────────────────────────────────
 
-router.get("/auth/microsoft", async (req, res) => {
+// Step 1: Show email entry page before redirecting to Microsoft
+router.get("/auth/microsoft", (req, res) => {
+  res.render("microsoft_email", { error: null });
+});
+
+// Step 2: Handle email submission, check SSO, then redirect to Microsoft if SSO enabled
+router.post("/auth/microsoft/email", async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.render("microsoft_email", { error: "Email is required." });
+  }
+  // Here you would check if the user is SSO enabled. For demo, assume all emails are SSO enabled.
+  // If not SSO enabled, show error or alternative flow.
+  // If SSO enabled, redirect to Microsoft auth
   try {
     const authUrl = await getMsalClient().getAuthCodeUrl({
       scopes: SCOPES,
       redirectUri: REDIRECT_URI,
+      loginHint: email, // pre-fill email in Microsoft login
       prompt: "select_account",
     });
     res.redirect(authUrl);
   } catch (err) {
     console.error("Microsoft auth start error:", err.message, err.stack);
     const detail = process.env.NODE_ENV !== "production" ? ` (${err.message})` : "";
-    res.render("login", { error: `Could not start Microsoft login. Check your Entra config.${detail}` });
+    res.render("microsoft_email", { error: `Could not start Microsoft login. Check your Entra config.${detail}` });
   }
 });
 
