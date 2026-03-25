@@ -6,6 +6,8 @@
  *   POST /auth/local/login              → email + password login
  *   POST /auth/local/register           → create a new local account
  *   GET  /auth/microsoft                → start Microsoft OAuth flow
+ *   POST /auth/microsoft/email          → handle email submission for Microsoft login
+ *   POST /auth/microsoft/start          → start Microsoft login after SSO check
  *   GET  /auth/microsoft/callback       → handle Microsoft redirect
  *   GET  /logout                        → destroy session
  */
@@ -29,6 +31,15 @@ function getMsalClient() {
     msalClient = new msal.ConfidentialClientApplication(msalConfig);
   }
   return msalClient;
+}
+
+// Helper: Simulate SSO config fetch
+async function getSsoConfigForEmail(email) {
+  // Replace this with real DB/API lookup
+  if (email.toLowerCase().includes('microsoft')) {
+    return { provider: 'microsoft', tenant: 'example-tenant' };
+  }
+  return null;
 }
 
 // ─── Login page ──────────────────────────────────────────────────────────────
@@ -121,30 +132,41 @@ router.post("/auth/local/register", async (req, res) => {
 
 // Step 1: Show email entry page before redirecting to Microsoft
 router.get("/auth/microsoft", (req, res) => {
-  res.render("microsoft_email", { error: null });
+  res.render("microsoft_email", { error: null, showMicrosoftButton: false, email: "" });
 });
 
-// Step 2: Handle email submission, check SSO, then redirect to Microsoft if SSO enabled
+// Step 2: Handle email submission, check SSO config, then show Microsoft button if SSO enabled
 router.post("/auth/microsoft/email", async (req, res) => {
   const { email } = req.body;
   if (!email) {
-    return res.render("microsoft_email", { error: "Email is required." });
+    return res.render("microsoft_email", { error: "Email is required.", showMicrosoftButton: false, email: "" });
   }
-  // Here you would check if the user is SSO enabled. For demo, assume all emails are SSO enabled.
-  // If not SSO enabled, show error or alternative flow.
-  // If SSO enabled, redirect to Microsoft auth
+  // Simulate SSO config fetch (replace with real logic as needed)
+  // For demo: if email contains 'microsoft', assume SSO enabled
+  const ssoConfig = await getSsoConfigForEmail(email);
+  const isSsoEnabled = ssoConfig && ssoConfig.provider === 'microsoft';
+  if (!isSsoEnabled) {
+    return res.render("microsoft_email", { error: "No Microsoft SSO configuration found for this email.", showMicrosoftButton: false, email });
+  }
+  // SSO enabled: show Microsoft login button
+  res.render("microsoft_email", { error: null, showMicrosoftButton: true, email });
+});
+
+// Step 3: Microsoft login redirect (after email is validated)
+router.post("/auth/microsoft/start", async (req, res) => {
+  const { email } = req.body;
   try {
     const authUrl = await getMsalClient().getAuthCodeUrl({
       scopes: SCOPES,
       redirectUri: REDIRECT_URI,
-      loginHint: email, // pre-fill email in Microsoft login
+      loginHint: email,
       prompt: "select_account",
     });
     res.redirect(authUrl);
   } catch (err) {
     console.error("Microsoft auth start error:", err.message, err.stack);
     const detail = process.env.NODE_ENV !== "production" ? ` (${err.message})` : "";
-    res.render("microsoft_email", { error: `Could not start Microsoft login. Check your Entra config.${detail}` });
+    res.render("microsoft_email", { error: `Could not start Microsoft login. Check your Entra config.${detail}`, showMicrosoftButton: true, email });
   }
 });
 
