@@ -223,6 +223,48 @@ router.get("/auth/microsoft/callback", async (req, res) => {
 });
 
 // ─── Logout ──────────────────────────────────────────────────────────────────
+// ─── SAML Assertion Consumer Service (ACS) endpoint — for SAML responses ───
+router.post("/auth/saml/callback", async (req, res) => {
+  try {
+    // Log all body parameters received from the SAML IdP
+    console.log("[SAML CALLBACK] Body Params:", req.body);
+    const { SAMLResponse, RelayState, error, error_description, email } = req.body;
+
+    // Log and handle error responses from SAML IdP
+    if (error) {
+      console.error("[SAML CALLBACK] Error from IdP:", error, error_description);
+      return res.render("login", { error: `SAML login failed: ${error_description || error}` });
+    }
+
+    if (!SAMLResponse) {
+      console.error("[SAML CALLBACK] No SAMLResponse received.");
+      return res.render("login", { error: "SAML login failed — no SAMLResponse received." });
+    }
+
+    // Simulate extracting user info from SAML assertion (replace with real parsing in production)
+    // For demo, use a static user or email from RelayState/body
+    const userEmail = email || "samluser@example.com";
+    const userName = "SAML User";
+    console.log("[SAML CALLBACK] Using userEmail:", userEmail);
+
+    // Create a local record if this is the user's first SAML login
+    const user = userStore.findOrCreateMicrosoftUser(userEmail, userName);
+
+    req.session.user = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      provider: "saml",
+    };
+
+    res.redirect("/dashboard");
+  } catch (err) {
+    console.error("[SAML CALLBACK] Unhandled error:", err);
+    res.render("login", {
+      error: "SAML login failed. Please try again. (See server logs for details)",
+    });
+  }
+});
 
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
@@ -231,14 +273,6 @@ router.get("/logout", (req, res) => {
   });
 });
 
-// ─── SAML Assertion Consumer Service (ACS) endpoint — for SAML responses ───
-router.post("/auth/saml/callback", (req, res) => {
-  // In a real implementation, you would parse and validate the SAML response here.
-  // For demo, just show a message or redirect.
-  // Example: req.body.SAMLResponse (base64-encoded XML)
-  console.log("[SAML] SAMLResponse received:", req.body.SAMLResponse);
-  // TODO: Parse SAMLResponse, extract user info, create session, etc.
-  res.send("SAML SSO callback received. (Demo: SAML processing not implemented)");
-});
+
 
 module.exports = router;
