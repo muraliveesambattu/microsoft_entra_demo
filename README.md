@@ -48,7 +48,7 @@ cp .env.example .env
 | `CLIENT_ID` | Application (client) ID from Azure App Registration |
 | `CLIENT_SECRET` | Client secret value |
 | `TENANT_ID` | Directory (tenant) ID |
-| `REDIRECT_URI` | Must match the redirect URI in Azure (default: `http://localhost:3000/auth/microsoft/callback`) |
+| `REDIRECT_URI_OIDC` | Must match the redirect URI in Azure (default: `http://localhost:3000/auth/microsoft/callback`) |
 | `SESSION_SECRET` | Random string for signing session cookies |
 
 ### 3. Run the app

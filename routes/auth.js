@@ -14,7 +14,7 @@
 
 const express = require("express");
 const msal = require("@azure/msal-node");
-const { msalConfig, REDIRECT_URI, SCOPES } = require("../config");
+const { msalConfig, REDIRECT_URI_OIDC, SCOPES } = require("../config");
 const userStore = require("../store/users");
 
 const router = express.Router();
@@ -36,7 +36,10 @@ function getMsalClient() {
 // Helper: Simulate SSO config fetch
 async function getSsoConfigForEmail(email) {
   // Replace this with real DB/API lookup
-  if (email.toLowerCase().includes('microsoft')) {
+  if (
+    email.toLowerCase().includes('microsoft') ||
+    email.toLowerCase() === 'murali.v@labtech24.in'
+  ) {
     return { provider: 'microsoft', tenant: 'example-tenant' };
   }
   return null;
@@ -138,6 +141,7 @@ router.get("/auth/microsoft", (req, res) => {
 // Step 2: Handle email submission, check SSO config, then show Microsoft button if SSO enabled
 router.post("/auth/microsoft/email", async (req, res) => {
   const { email } = req.body;
+
   if (!email) {
     return res.render("microsoft_email", { error: "Email is required.", showMicrosoftButton: false, email: "" });
   }
@@ -158,7 +162,7 @@ router.post("/auth/microsoft/start", async (req, res) => {
   try {
     const authUrl = await getMsalClient().getAuthCodeUrl({
       scopes: SCOPES,
-      redirectUri: REDIRECT_URI,
+      redirectUri: REDIRECT_URI_OIDC,
       loginHint: email,
       prompt: "select_account",
     });
@@ -184,11 +188,15 @@ router.get("/auth/microsoft/callback", async (req, res) => {
     const tokenResponse = await getMsalClient().acquireTokenByCode({
       code,
       scopes: SCOPES,
-      redirectUri: REDIRECT_URI,
+      redirectUri: REDIRECT_URI_OIDC,
     });
 
     // Log the full response from Microsoft Entra
-    console.log("[Microsoft Entra] Token Response:", JSON.stringify(tokenResponse, null, 2));
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[Microsoft Entra] Token Response:", JSON.stringify(tokenResponse, null, 2));
+    } else {
+      console.info("[Microsoft Entra] Token Response received (details hidden in production)");
+    }
 
     // Extract user info from the ID token claims
     const claims = tokenResponse.idTokenClaims;
@@ -221,6 +229,16 @@ router.get("/logout", (req, res) => {
     if (err) console.error("Session destroy error:", err);
     res.redirect("/login");
   });
+});
+
+// ─── SAML Assertion Consumer Service (ACS) endpoint — for SAML responses ───
+router.post("/auth/saml/callback", (req, res) => {
+  // In a real implementation, you would parse and validate the SAML response here.
+  // For demo, just show a message or redirect.
+  // Example: req.body.SAMLResponse (base64-encoded XML)
+  console.log("[SAML] SAMLResponse received:", req.body.SAMLResponse);
+  // TODO: Parse SAMLResponse, extract user info, create session, etc.
+  res.send("SAML SSO callback received. (Demo: SAML processing not implemented)");
 });
 
 module.exports = router;

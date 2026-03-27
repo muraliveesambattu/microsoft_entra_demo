@@ -27,7 +27,9 @@ const msalConfig = {
 };
 
 // Scopes requested during the Microsoft login flow
-const REDIRECT_URI = process.env.REDIRECT_URI;
+const REDIRECT_URI_OIDC = process.env.REDIRECT_URI_OIDC;
+const REDIRECT_URI_SAML = process.env.REDIRECT_URI_SAML;
+
 const SCOPES = ["openid", "profile", "email", "User.Read"];
 
-module.exports = { msalConfig, REDIRECT_URI, SCOPES };
+module.exports = { msalConfig, REDIRECT_URI_OIDC, SCOPES };
